@@ -2,21 +2,22 @@
   "name": "Al-Sayed Clinical Diagnostic",
   "short_name": "Al-Sayed Lab",
   "description": "Precision, Quality & Accuracy Laboratory Diagnostic App",
-  "start_url": "/AL-Sayid-Clinical-Diagnostics/",
-  "scope": "/AL-Sayid-Clinical-Diagnostics/",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "display_override": ["window-control-overlay", "standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#0f766e",
   "theme_color": "#0f766e",
   "icons": [
     {
-      "src": "icon.png.png?v=2",
+      "src": "icon.png.png?v=3",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon.png.png?v=2",
+      "src": "icon.png.png?v=3",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

@@ -1,0 +1,17 @@
+{
+  "name": "Al-Sayed Clinical Diagnostic",
+  "short_name": "Al-Sayed Lab",
+  "description": "Precision, Quality & Accuracy Laboratory Diagnostic App",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f766e",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3063/3063176.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

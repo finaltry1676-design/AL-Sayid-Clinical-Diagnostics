@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Al-Sayed Clinical Diagnostic</title>
+    
+    <!-- Link to Local Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f766e">
+    <link rel="apple-touch-icon" href="icon.png">
+    
+    <!-- Self-contained offline PDF generator bundle -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: #f1f5f9; color: #1e293b; padding-bottom: 50px; }
+        header { background-color: #0f766e; color: white; padding: 16px; text-align: center; position: sticky; top: 0; z-index: 50; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        header h1 { font-size: 18px; font-weight: bold; letter-spacing: 0.5px; }
+        header p { font-size: 11px; color: #ccfbf1; margin-top: 2px; }
+        .container { max-width: 440px; margin: 0 auto; padding: 16px; }
+        
+        /* Direct Install Banner */
+        #install-banner { background: #047857; color: white; padding: 10px; font-size: 12px; font-weight: bold; display: none; align-items: center; justify-content: space-between; border-radius: 8px; margin-top: 10px; cursor: pointer; border: 1px solid #059669; }
+        
+        /* Navigation Tabs */
+        .nav-tabs { display: grid; grid-template-columns: repeat(3, 1fr); background-color: #e2e8f0; padding: 4px; border-radius: 8px; gap: 4px; margin-top: 12px; }
+        .nav-btn { padding: 9px 4px; font-size: 12px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; text-align: center; background: transparent; color: #475569; transition: all 0.2s; }
+        .nav-btn.active { background: white; color: #0f766e; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        
+        /* Cards & Layout */
+        .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; margin-top: 16px; }
+        .card h2 { font-size: 15px; font-weight: bold; color: #334155; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; outline: none; background: #fff; }
+        input:focus, select:focus, textarea:focus { border-color: #0f766e; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        /* Buttons */
+        .btn { width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 13px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 12px; transition: background 0.2s; }
+        .btn-whatsapp { background-color: #059669; color: white; }
+        .btn-whatsapp:hover { background-color: #047857; }
+        .btn-primary { background-color: #0f766e; color: white; }
+        .btn-primary:hover { background-color: #115e59; }
+        .btn-danger { background-color: #dc2626; color: white; }
+        .btn-danger:hover { background-color: #b91c1c; }
+        .btn-secondary { background-color: #334155; color: white; }
+        .btn-secondary:hover { background-color: #1e293b; }
+        
+        /* Sections */
+        .tab-section { display: none; }
+        .tab-section.active-section { display: block; }
+        
+        /* Test Row styling */
+        .test-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+        .font-mono { font-family: 'Courier New', Courier, monospace; }
+        
+        /* Modal */
+        .modal { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); display: none; align-items: center; justify-content: center; padding: 16px; z-index: 100; }
+        .modal-content { background: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 320px; }
+    </style>
+</head>
+<body>
+
+    <!-- Header Branding -->
+    <header>
+        <div style="max-width: 440px; margin: 0 auto;">
+            <h1>🏥 AL-SAYED CLINICAL DIAGNOSTIC</h1>
+            <p>Precision • Quality • Accuracy</p>
+            <button id="install-banner" onclick="triggerInstall()">
+                <span>📲 Install App to Home Screen</span>
+                <span style="background: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 4px;">INSTALL NOW</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- App Navigation Tabs -->
+    <div class="container" style="padding-bottom: 0;">
+        <div class="nav-tabs">
+            <button type="button" id="tab-receipt-btn" class="nav-btn active" onclick="switchTab('receipt')">Receipt</button>
+            <button type="button" id="tab-report-btn" class="nav-btn" onclick="switchTab('report')">Report</button>
+            <button type="button" id="tab-history-btn" class="nav-btn" onclick="switchTab('history')">History</button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+
+        <!-- ================= PAGE 1: PAYMENT RECEIPT ================= -->
+        <section id="section-receipt" class="tab-section active-section">
+            <div class="card">
+                <h2>📋 Patient & Billing Details</h2>
+                
+                <div class="form-group">
+                    <label>👤 Patient Name</label>
+                    <input type="text" id="rcpt-name" placeholder="e.g., Qazi Danish Rehman">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>🆔 Ref ID / Lab No</label>
+                        <input type="text" id="rcpt-ref" placeholder="e.g., 1676">
+                    </div>
+                    <div class="form-group">
+                        <label>📱 WhatsApp Number</label>
+                        <input type="tel" id="rcpt-phone" placeholder="e.g., 923167399584">
+                    </div>
+                </div>
+
+                <!-- Dynamic Test Rows -->
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                        <label style="margin-bottom:0;">🧪 Tests & Individual Fees</label>
+                        <button type="button" id="add-test-btn" class="btn-primary" style="padding: 4px 8px; font-size: 11px; width: auto; margin-top:0;">+ Add Test</button>
+                    </div>
+                    <div id="test-rows-container">
+                        <div class="test-row">
+                            <input type="text" placeholder="e.g., LFT" class="test-name-input" style="flex:1;">
+                            <input type="number" placeholder="Fee" class="test-fee-input" style="width: 80px;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>💵 Total Fee (PKR)</label>
+                        <input type="number" id="rcpt-total" placeholder="0" readonly style="background: #f8fafc;">
+                    </div>
+                    <div class="form-group">
+                        <label>🏷️ Discount (PKR)</label>
+                        <input type="number" id="rcpt-discount" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>💰 Net Paid Amount (PKR)</label>
+                        <input type="number" id="rcpt-net" readonly placeholder="0" style="background: #f8fafc; font-weight: bold; color: #0f766e;">
+                    </div>
+                    <div class="form-group">
+                        <label>📌 Payment Status</label>
+                        <select id="rcpt-status">
+                            <option value="Completely Paid">Completely Paid</option>
+                            <option value="Partially Paid">Partially Paid</option>
+                            <option value="Not Paid">Not Paid</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="button" id="send-receipt-btn" class="btn btn-whatsapp" onclick="sendReceiptWhatsApp()">💬 Send Receipt via WhatsApp</button>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 2: LAB REPORT GENERATOR ================= -->
+        <section id="section-report" class="tab-section">
+            <div class="card">
+                <h2>🔬 Report Input</h2>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>👤 Patient Name</label>
+                        <input type="text" id="rpt-name" placeholder="e.g., Qazi Danish Rehman">
+                    </div>
+                    <div class="form-group">
+                        <label>🆔 Ref ID</label>
+                        <input type="text" id="rpt-ref" placeholder="e.g., 1676">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>📱 WhatsApp Number</label>
+                    <input type="tel" id="rpt-phone" placeholder="e.g., 923167399584">
+                </div>
+                <div class="form-group">
+                    <label>📋 Raw Lab Results Data</label>
+                    <textarea id="rpt-data" rows="7" class="font-mono" placeholder="Hemoglobin: 14.2 g/dL&#10;WBC: 7,500 /uL"></textarea>
+                </div>
+
+                <button type="button" id="send-text-report-btn" class="btn btn-whatsapp" onclick="sendTextReportWhatsApp()">💬 Send Text Report Direct to Chat</button>
+                <button type="button" id="download-pdf-btn" class="btn btn-primary" onclick="downloadPDF()">📥 Save PDF Report Directly</button>
+                <div class="grid-2" style="margin-top: 10px;">
+                    <button type="button" id="print-pdf-btn" class="btn btn-secondary" style="margin-top:0;" onclick="window.print()">🖨️ Print Preview</button>
+                    <button type="button" id="open-chat-btn" class="btn btn-whatsapp" style="margin-top:0;" onclick="openChatDirect()">💬 Open Chat</button>
+                </div>
+            </div>
+
+            <!-- PDF PRINT TEMPLATE CONTAINER -->
+            <div id="pdf-container-wrap" style="position: absolute; left: -9999px; top: 0;">
+                <div id="pdf-template" class="font-mono" style="padding: 30px; background: white; color: black; width: 750px;">
+                    <div style="border-bottom: 2px solid #0f766e; padding-bottom: 12px; margin-bottom: 16px; text-align: center;">
+                        <h1 style="font-size: 22px; font-weight: bold; color: #0f766e; margin: 0;">🏥 AL-SAYED CLINICAL DIAGNOSTIC</h1>
+                        <p style="font-size: 11px; margin-top: 4px; color: #475569;">Precision • Quality • Accuracy</p>
+                    </div>
+                    <div style="margin-bottom: 16px; font-size: 12px; line-height: 1.6;">
+                        <p><strong>Patient Name:</strong> <span id="pdf-patient-name"></span></p>
+                        <p><strong>Reference ID:</strong> <span id="pdf-patient-ref"></span></p>
+                        <p><strong>Test Category:</strong> <span id="pdf-test-name"></span></p>
+                        <p><strong>Date:</strong> <span id="pdf-date"></span></p>
+                    </div>
+                    <div style="border: 1px solid #cbd5e1; padding: 16px; min-height: 250px; white-space: pre-wrap; font-size: 12px; line-height: 1.5;" id="pdf-body"></div>
+
+                    <div style="margin-top: 40px; border-top: 1px solid #cbd5e1; padding-top: 12px;">
+                        <p style="font-size: 9px; color: #64748b; font-style: italic; margin-bottom: 16px;">
+                            * Notice: This diagnostic report is prepared for clinical correlation only and is not valid for legal or medico-legal proceedings.
+                        </p>
+                        <div style="font-size: 11px; line-height: 1.4;">
+                            <p>Regards,</p>
+                            <p style="margin-top: 4px; font-weight: bold;">Umair Khan</p>
+                            <p>Lab Technologist & Administrator</p>
+                            <p>BS-MLT, MS Pathology</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= PAGE 3: HISTORY LOG ================= -->
+        <section id="section-history" class="tab-section">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 16px;">
+                    <h2 style="border:none; padding:0; margin:0;">🕒 Activity & History Log</h2>
+                    <button type="button" id="clear-history-btn" class="btn btn-danger" style="padding: 6px 10px; font-size: 11px; width: auto; margin-top:0;" onclick="requestClearHistory()">🗑️ Clear History</button>
+                </div>
+
+                <div class="grid-2" style="margin-bottom: 16px;">
+                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px; border-radius: 8px; text-align: center;">
+                        <p style="font-size: 10px; color: #166534; font-weight: 600;">Total Receipts Sent</p>
+                        <p id="stat-receipts" style="font-size: 16px; font-weight: bold; color: #15803d; margin-top: 2px;">0</p>
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; text-align: center;">
+                        <p style="font-size: 10px; color: #475569; font-weight: 600;">Total Reports Sent</p>
+                        <p id="stat-reports" style="font-size: 16px; font-weight: bold; color: #334155; margin-top: 2px;">0</p>
+                    </div>
+                </div>
+
+                <div id="history-log-container" style="max-height: 400px; overflow-y: auto;">
+                    <p style="font-size: 11px; color: #94a3b8; text-align: center; padding: 20px;">No transaction or report history recorded yet.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ADMIN PASSWORD MODAL -->
+    <div id="password-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="font-size: 13px; font-weight: bold; color: #1e293b; margin-bottom: 8px;">🔐 Administrator Authorization</h3>
+            <p style="font-size: 11px; color: #64748b; margin-bottom: 12px;">Enter the administrator password to wipe all history records at once.</p>
+            <input type="password" id="admin-pass-input" placeholder="Enter Admin Password" style="margin-bottom: 12px;">
+            <div class="grid-2">
+                <button type="button" id="cancel-pass-btn" class="btn btn-secondary" style="margin-top:0;" onclick="closePasswordModal()">Cancel</button>
+                <button type="button" id="authorize-pass-btn" class="btn btn-danger" style="margin-top:0;" onclick="verifyAndClearHistory()">Authorize</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASSWORD = "Danish16761676";
+        let historyLog = JSON.parse(localStorage.getItem('al_sayed_history') || '[]');
+        let deferredPrompt;
+
+        // Register PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(reg => console.log('App Ready')).catch(err => console.log(err));
+        }
+
+        // Capture Native Install Prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('install-banner').style.display = 'flex';
+        });
+
+        function triggerInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        document.getElementById('install-banner').style.display = 'none';
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                alert('App installation ready! Tap your browser menu (3 dots or share button) and select "Add to Home Screen" / "Install App".');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('rcpt-name').addEventListener('input', () => syncField('receipt'));
+            document.getElementById('rcpt-ref').addEventListener('input', () => syncField('receipt'));
+            document.getElementById('rcpt-phone').addEventListener('input', () => syncField('receipt'));
+
+            document.getElementById('rpt-name').addEventListener('input', () => syncField('report'));
+            document.getElementById('rpt-ref').addEventListener('input', () => syncField('report'));
+            document.getElementById('rpt-phone').addEventListener('input', () => syncField('report'));
+
+            document.getElementById('rcpt-discount').addEventListener('input', calcNet);
+            document.getElementById('add-test-btn').addEventListener('click', addTestRow);
+
+            document.getElementById('test-rows-container').addEventListener('input', function(e) {
+                if (e.target.classList.contains('test-fee-input')) {
+                    calculateTotalFromTests();
+                }
+            });
+
+            document.getElementById('test-rows-container').addEventListener('click', function(e) {
+                if (e.target.closest('.remove-row-btn')) {
+                    e.target.closest('.test-row').remove();
+                    calculateTotalFromTests();
+                }
+            });
+        });
+
+        function switchTab(tabName) {
+            const receiptSec = document.getElementById('section-receipt');
+            const reportSec = document.getElementById('section-report');
+            const historySec = document.getElementById('section-history');
+
+            receiptSec.classList.remove('active-section');
+            reportSec.classList.remove('active-section');
+            historySec.classList.remove('active-section');
+
+            document.getElementById('tab-receipt-btn').className = "nav-btn";
+            document.getElementById('tab-report-btn').className = "nav-btn";
+            document.getElementById('tab-history-btn').className = "nav-btn";
+
+            if (tabName === 'receipt') {
+                receiptSec.classList.add('active-section');
+                document.getElementById('tab-receipt-btn').className = "nav-btn active";
+            } else if (tabName === 'report') {
+                reportSec.classList.add('active-section');
+                document.getElementById('tab-report-btn').className = "nav-btn active";
+            } else if (tabName === 'history') {
+                historySec.classList.add('active-section');
+                document.getElementById('tab-history-btn').className = "nav-btn active";
+                renderHistory();
+            }
+        }
+
+        function syncField(source) {
+            if (source === 'receipt') {
+                document.getElementById('rpt-name').value = document.getElementById('rcpt-name').value;
+                document.getElementById('rpt-ref').value = document.getElementById('rcpt-ref').value;
+                document.getElementById('rpt-phone').value = document.getElementById('rcpt-phone').value;
+            } else {
+                document.getElementById('rcpt-name').value = document.getElementById('rpt-name').value;
+                document.getElementById('rcpt-ref').value = document.getElementById('rpt-ref').value;
+                document.getElementById('rcpt-phone').value = document.getElementById('rpt-phone').value;
+            }
+        }
+
+        function addTestRow() {
+            const container = document.getElementById('test-rows-container');
+            const row = document.createElement('div');
+            row.className = "test-row";
+            row.innerHTML = `
+                <input type="text" placeholder="e.g., CBC" class="test-name-input" style="flex:1;">
+                <input type="number" placeholder="Fee" class="test-fee-input" style="width: 80px;">
+                <button type="button" class="remove-row-btn btn-danger" style="padding: 9px; width: auto; font-size: 10px; margin-top:0;">X</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function calculateTotalFromTests() {
+            let total = 0;
+            document.querySelectorAll('.test-fee-input').forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+            document.getElementById('rcpt-total').value = total;
+            calcNet();
+        }
+
+        function calcNet() {
+            const total = parseFloat(document.getElementById('rcpt-total').value) || 0;
+            const discount = parseFloat(document.getElementById('rcpt-discount').value) || 0;
+            document.getElementById('rcpt-net').value = Math.max(0, total - discount);
+        }
+
+        function getTestsSummary() {
+            let list = [];
+            document.querySelectorAll('.test-row').forEach(row => {
+                const name = row.querySelector('.test-name-input').value.trim();
+                const fee = row.querySelector('.test-fee-input').value.trim();
+                if (name) {
+                    list.push(`- ${name} ${fee ? '(PKR ' + fee + ')' : ''}`);
+                }
+            });
+            return list.length > 0 ? list.join('\n') : "- General Lab Tests";
+        }
+
+        function getTestNamesList() {
+            let names = [];
+            document.querySelectorAll('.test-row').forEach(row => {
+                const name = row.querySelector('.test-name-input').value.trim();
+                if (name) {
+                    names.push(name.toUpperCase());
+                }
+            });
+            return names.length > 0 ? names.join(' / ') : "LAB TEST";
+        }
+
+        function logActivity(type, title, subtitle) {
+            historyLog.unshift({ type, title, subtitle, timestamp: new Date().toLocaleString() });
+            localStorage.setItem('al_sayed_history', JSON.stringify(historyLog));
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-log-container');
+            document.getElementById('stat-receipts').innerText = historyLog.filter(h => h.type === 'receipt').length;
+            document.getElementById('stat-reports').innerText = historyLog.filter(h => h.type === 'report').length;
+
+            if (historyLog.length === 0) {
+                container.innerHTML = `<p style="font-size: 11px; color: #94a3b8; text-align: center; padding: 20px;">No transaction or report history recorded yet.</p>`;
+                return;
+            }
+
+            container.innerHTML = historyLog.map(item => `
+                <div style="padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 11px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="font-weight: bold; color: #334155; margin-bottom: 2px;">${item.title}</div>
+                        <div style="color: #64748b;">${item.subtitle}</div>
+                        <div style="font-size: 9px; color: #94a3b8; margin-top: 4px;">${item.timestamp}</div>
+                    </div>
+                    <span style="padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; background: ${item.type === 'receipt' ? '#ccfbf1; color: #0f766e;' : '#e2e8f0; color: #334155;'}">
+                        ${item.type.toUpperCase()}
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function requestClearHistory() {
+            document.getElementById('admin-pass-input').value = '';
+            document.getElementById('password-modal').style.display = 'flex';
+        }
+
+        function closePasswordModal() {
+            document.getElementById('password-modal').style.display = 'none';
+        }
+
+        function verifyAndClearHistory() {
+            if (document.getElementById('admin-pass-input').value === ADMIN_PASSWORD) {
+                historyLog = [];
+                localStorage.removeItem('al_sayed_history');
+                renderHistory();
+                closePasswordModal();
+                alert('History log successfully cleared.');
+            } else {
+                alert('Incorrect administrator password.');
+            }
+        }
+
+        function sendReceiptWhatsApp() {
+            const name = document.getElementById('rcpt-name').value || "Qazi Danish Rehman";
+            const ref = document.getElementById('rcpt-ref').value || "1676";
+            const phone = (document.getElementById('rcpt-phone').value || "923167399584").replace(/[^0-9]/g, '');
+            const net = document.getElementById('rcpt-net').value || "0";
+            const status = document.getElementById('rcpt-status').value;
+
+            logActivity('receipt', `Receipt: ${name} (Ref: ${ref})`, `Net Paid: PKR ${net} (${status})`);
+
+            const msg = `🏥 *AL-SAYED CLINICAL DIAGNOSTIC*\n_Precision • Quality • Accuracy_\n\n*OFFICIAL PAYMENT RECEIPT*\n----------------------------------\n*👤 Patient Name:* ${name}\n*🆔 Ref ID:* ${ref}\n*🧪 Tests:* \n${getTestsSummary()}\n\n*💵 Total Fee:* PKR ${document.getElementById('rcpt-total').value || 0}\n*🏷️ Discount:* PKR ${document.getElementById('rcpt-discount').value || 0}\n*💰 Net Paid:* PKR ${net}\n*📌 Status:* ${status}\n----------------------------------\n\nRegards,\n\n*Umair Khan*\nLab Technologist & Administrator\nBS-MLT, MS Pathology`;
+
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function sendTextReportWhatsApp() {
+            const name = document.getElementById('rpt-name').value || "Qazi Danish Rehman";
+            const ref = document.getElementById('rpt-ref').value || "1676";
+            const phone = (document.getElementById('rpt-phone').value || "923167399584").replace(/[^0-9]/g, '');
+            const rawData = document.getElementById('rpt-data').value.trim() || "Hemoglobin: 14.2 g/dL";
+            const testHeading = getTestNamesList();
+
+            logActivity('report', `Text Report: ${name} (Ref: ${ref})`, `Sent via WhatsApp`);
+
+            const msg = `🏥 *AL-SAYED CLINICAL DIAGNOSTIC*\n_Precision • Quality • Accuracy_\n\n*📋 LABORATORY REPORT*\n*👤 Patient:* ${name}\n*🆔 Ref ID:* ${ref}\n\n*[ ${testHeading} ]*\n${rawData}\n\n_Note: Not valid for legal or medico-legal proceedings._\n\nRegards,\n\n*Umair Khan*\nLab Technologist & Administrator\nBS-MLT, MS Pathology`;
+
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function openChatDirect() {
+            const phone = (document.getElementById('rpt-phone').value || "923167399584").replace(/[^0-9]/g, '');
+            window.open(`https://wa.me/${phone}`, '_blank');
+        }
+
+        function downloadPDF() {
+            const name = document.getElementById('rpt-name').value || "Qazi Danish Rehman";
+            const ref = document.getElementById('rpt-ref').value || "1676";
+            const rawData = document.getElementById('rpt-data').value || "[Test Results]";
+            const testHeading = getTestNamesList();
+
+            logActivity('report', `PDF Download: ${name} (Ref: ${ref})`, `Downloaded PDF Report`);
+
+            document.getElementById('pdf-patient-name').innerText = name;
+            document.getElementById('pdf-patient-ref').innerText = ref;
+            document.getElementById('pdf-test-name').innerText = testHeading;
+            document.getElementById('pdf-date').innerText = new Date().toLocaleDateString();
+            document.getElementById('pdf-body').innerText = rawData;
+
+            const element = document.getElementById('pdf-template');
+            const opt = {
+                margin:       0.4,
+                filename:     `Report_${ref}_${name.replace(/\s+/g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().from(element).set(opt).save();
+        }
+    </script>
+</body>
+</html>
